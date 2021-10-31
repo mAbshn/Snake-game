@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake</title>
+
+    <style>
+        #canvas {
+            display: block;
+            margin: 0 auto;
+            background-color: #1a1a1a;
+        }
+    </style>
+
+</head>
+<body>
+    <canvas id="canvas" width="800px" height="800px"></canvas>
+
+    <script>
+
+        function snake() {
+
+            const canvas = document.querySelector('#canvas');
+            const ctx = canvas.getContext('2d');
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const cellSize = 40;
+            const length = 5;
+            const trail = [];
+            let lastElem = null;
+            const meal = {x: null, y: null};
+            let dx = cellSize;
+            let dy = 0;
+
+            window.onload = function() {
+                for (let i = 0; i < length; i++) {
+                    trail.unshift({x: cellSize*i, y: cellSize});
+                }
+                mealSpawn();
+                setInterval(game, 1000/15);
+            }
+
+            function game() {
+                document.addEventListener('keydown', keyPush);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00f9ff';
+                ctx.fillRect(meal.x + 1, meal.y + 1, cellSize - 2, cellSize - 2);
+                ctx.fillStyle = '#00ff7f';
+                moving();
+                eating();
+                selfEating();
+                if (trail.length === (canvasWidth/cellSize)*(canvasHeight/cellSize)) {
+                    alert('YOU WIN');
+                    snake();
+                }
+            }
+
+            function keyPush(event) {
+                document.removeEventListener('keydown', keyPush);
+                if (event.keyCode === 40 && dx !== 0) {
+                    dx = 0;
+                    dy = cellSize;
+                }
+                if (event.keyCode === 38 && dx !== 0) {
+                    dx = 0;
+                    dy = -cellSize;
+                }
+                if (event.keyCode === 39 && dy !== 0) {
+                    dx = cellSize;
+                    dy = 0;
+                }
+                if (event.keyCode === 37 && dy !== 0) {
+                    dx = -cellSize;
+                    dy = 0;
+                }
+            }
+
+            function moving() {
+                if (trail[0].x + dx >= canvasWidth) {
+                    trail.unshift({x: 0, y: trail[0].y});
+                }
+                else if (trail[0].x + dx < 0) {
+                    trail.unshift({x: canvasWidth - cellSize, y: trail[0].y});
+                }
+                else if (trail[0].y + dy >= canvasHeight) {
+                    trail.unshift({x: trail[0].x, y: 0});
+                }
+                else if (trail[0].y + dy < 0) {
+                    trail.unshift({x: trail[0].x, y: canvasHeight - cellSize});
+                }
+                else trail.unshift({x: trail[0].x + dx, y: trail[0].y + dy});
+                lastElem = trail.pop();
+                for (let i = 0; i < trail.length; i++) {
+                    ctx.fillRect(trail[i].x + 1, trail[i].y + 1, cellSize - 2, cellSize - 2);
+                }
+            }
+
+            function mealSpawn() {
+                do {
+                    meal.x = cellSize * Math.floor(Math.random()*((canvasWidth-cellSize)/cellSize+1));
+                    meal.y = cellSize * Math.floor(Math.random()*((canvasHeight-cellSize)/cellSize+1));
+                }
+                while (isInSnake());
+                ctx.fillRect(meal.x + 1, meal.y + 1, cellSize - 2, cellSize - 2);
+
+                function isInSnake() {
+                    for (let elem of trail) {
+                        if (elem.x === meal.x && elem.y === meal.y) return true;
+                    }
+                    return false;
+                }
+            }
+
+            function eating() {
+                if (trail[0].x === meal.x && trail[0].y === meal.y) {
+                    trail.push(lastElem);
+                    mealSpawn();
+                }
+            }
+
+            function selfEating() {
+                for (let i = 1; i < trail.length; i++) {
+                    if (trail[0].x === trail[i].x && trail[0].y === trail[i].y) {
+                        trail.splice(i, trail.length - i);
+                    }
+                }
+            }
+        }
+
+        snake()
+
+    </script>
+</body>
+</html>
