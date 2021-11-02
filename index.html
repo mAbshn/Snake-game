@@ -28,6 +28,7 @@
             const cellSize = 40;
             const length = 5;
             const trail = [];
+            const maxLength = (canvasWidth/cellSize)*(canvasHeight/cellSize);
             let lastElem = null;
             const meal = {x: null, y: null};
             let dx = cellSize;
@@ -50,7 +51,7 @@
                 moving();
                 eating();
                 selfEating();
-                if (trail.length === (canvasWidth/cellSize)*(canvasHeight/cellSize)) {
+                if (trail.length === maxLength) {
                     alert('YOU WIN');
                     snake();
                 }
@@ -97,12 +98,14 @@
             }
 
             function mealSpawn() {
-                do {
-                    meal.x = cellSize * Math.floor(Math.random()*((canvasWidth-cellSize)/cellSize+1));
-                    meal.y = cellSize * Math.floor(Math.random()*((canvasHeight-cellSize)/cellSize+1));
+                if (trail.length !== maxLength) {
+                    do {
+                        meal.x = cellSize * Math.floor(Math.random()*((canvasWidth-cellSize)/cellSize+1));
+                        meal.y = cellSize * Math.floor(Math.random()*((canvasHeight-cellSize)/cellSize+1));
+                    }
+                    while (isInSnake());
+                    ctx.fillRect(meal.x + 1, meal.y + 1, cellSize - 2, cellSize - 2);
                 }
-                while (isInSnake());
-                ctx.fillRect(meal.x + 1, meal.y + 1, cellSize - 2, cellSize - 2);
 
                 function isInSnake() {
                     for (let elem of trail) {
